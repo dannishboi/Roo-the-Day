@@ -8,25 +8,41 @@ public class SlashDamage : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        // This slash has already damaged something
-        // Prevent one slash from damaging the same enemy multiple times
-        // if multiple collider events occur before the slash is destroyed.
         if (hasHit)
+            return;
+
+        // Tic-Tac-Toe: one slash selects one square.
+        TicTacToeCell cell = other.GetComponentInParent<TicTacToeCell>();
+
+        if (cell != null)
         {
+            Debug.Log("SLASH HIT CELL: " + cell.gameObject.name);
+
+            hasHit = true;
+            cell.TrySelect();
+
+            Destroy(gameObject);
             return;
         }
 
-        ghostHealth enemy = other.GetComponentInParent<ghostHealth>();
+        // Ghost damage.
+        ghostHealth ghost = other.GetComponentInParent<ghostHealth>();
 
-        if (enemy != null)
+        if (ghost != null)
         {
-            // Prevent any additional collision events
             hasHit = true;
+            ghost.TakeDamage(damage);
+            Destroy(gameObject);
+            return;
+        }
 
-            Debug.Log("Slash hit " + enemy.gameObject.name + " for " + damage + " damage.");
+        // Vine damage.
+        VineHealth vines = other.GetComponentInParent<VineHealth>();
 
-            enemy.TakeDamage(damage);
-
+        if (vines != null)
+        {
+            hasHit = true;
+            vines.TakeDamage(damage);
             Destroy(gameObject);
         }
     }
